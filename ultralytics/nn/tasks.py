@@ -13,6 +13,8 @@ import torch.nn as nn
 from ultralytics.nn.autobackend import check_class_names
 from ultralytics.nn.modules import (
     AIFI,
+    SPDConv,
+    SpaceToDepth,
     C1,
     C2,
     C2PSA,
@@ -1676,6 +1678,7 @@ def parse_model(d, ch, verbose=True):
         {
             Classify,
             Conv,
+            SPDConv,
             ConvTranspose,
             GhostConv,
             Bottleneck,
