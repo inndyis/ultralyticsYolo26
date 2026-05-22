@@ -11,6 +11,8 @@ import torch.nn as nn
 
 __all__ = (
     "CBAM",
+    "SpaceToDepth",
+    "SPDConv",
     "ChannelAttention",
     "Concat",
     "Conv",
@@ -25,9 +27,6 @@ __all__ = (
     "RepConv",
     "SpatialAttention",
 )
-import torch
-import torch.nn as nn
-
 
 class SpaceToDepth(nn.Module):
     """
