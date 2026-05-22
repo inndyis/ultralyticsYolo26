@@ -25,7 +25,60 @@ __all__ = (
     "RepConv",
     "SpatialAttention",
 )
+import torch
+import torch.nn as nn
 
+
+class SpaceToDepth(nn.Module):
+    """
+    Space-to-depth operation.
+    Input  : (B, C, H, W)
+    Output : (B, 4C, H/2, W/2)
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        # Agar aman, H dan W harus genap.
+        # Jika tidak genap, crop 1 pixel terakhir.
+        if x.shape[-2] % 2 != 0:
+            x = x[..., :-1, :]
+        if x.shape[-1] % 2 != 0:
+            x = x[..., :, :-1]
+
+        return torch.cat(
+            [
+                x[..., ::2, ::2],
+                x[..., 1::2, ::2],
+                x[..., ::2, 1::2],
+                x[..., 1::2, 1::2],
+            ],
+            dim=1,
+        )
+
+
+class SPDConv(nn.Module):
+    """
+    SPD-Conv = Space-to-Depth + Conv stride 1.
+    Secara fungsi, blok ini melakukan downsampling tanpa langsung membuang
+    piksel melalui stride convolution.
+    """
+
+    default_act = nn.SiLU()
+
+    def __init__(self, c1, c2, k=3, s=1, p=None, g=1, d=1, act=True):
+        super().__init__()
+
+        # Setelah SpaceToDepth, channel menjadi 4 kali lipat.
+        self.spd = SpaceToDepth()
+
+        # Gunakan Conv bawaan Ultralytics agar tetap konsisten:
+        # Conv(c1, c2, k, s, p, g, d, act)
+        self.conv = Conv(c1 * 4, c2, k, 1, p, g, d, act)
+
+    def forward(self, x):
+        return self.conv(self.spd(x))
 
 def autopad(k, p=None, d=1):  # kernel, padding, dilation
     """Pad to 'same' shape outputs."""
