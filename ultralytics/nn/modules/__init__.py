@@ -62,6 +62,8 @@ from .block import (
 )
 from .conv import (
     CBAM,
+    SPDConv,
+    SpaceToDepth,
     ChannelAttention,
     Concat,
     Conv,
